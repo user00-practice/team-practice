@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}チームメンバー一覧 | Team Practice{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>👥 チームメンバー一覧</h1>
+  <p class="page-desc">全員のページが完成したらゴールです！</p>
+</div>
+
+<!-- 進捗バー -->
+<section class="progress-section">
+  <div class="progress-label">
+    <span>チーム全体の進捗</span>
+    <span class="progress-count">{{ ready }} / {{ total }} 人完成</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill {% if progress == 100 %}complete{% endif %}"
+         style="width: {{ progress }}%;">
+      {{ progress }}%
+    </div>
+  </div>
+  {% if progress == 100 %}
+  <p class="progress-complete-msg">🎉 全員完成！おつかれさまでした！</p>
+  {% endif %}
+</section>
+
+<!-- メンバーカード一覧 -->
+<section class="member-grid">
+  {% for m in members %}
+  <div class="member-card {% if m.ready %}ready{% else %}pending{% endif %}">
+    <div class="card-badge">
+      {% if m.ready %}
+        <span class="badge badge-done">✅ 完成</span>
+      {% else %}
+        <span class="badge badge-pending">🔧 作成中</span>
+      {% endif %}
+    </div>
+    <div class="card-avatar">{{ m.user[-2:] }}</div>
+    <h2 class="card-name">
+      {% if m.name %}{{ m.name }}{% else %}<span class="placeholder">（未設定）</span>{% endif %}
+    </h2>
+    <p class="card-user">@{{ m.user }}</p>
+    <p class="card-tagline">
+      {% if m.tagline %}{{ m.tagline }}{% else %}<span class="placeholder">ひとことを入力してください</span>{% endif %}
+    </p>
+    {% if m.ready %}
+    <a href="/members/{{ m.user }}" class="card-link">プロフィールを見る →</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

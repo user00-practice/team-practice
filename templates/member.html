@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ member.name or member.user }} | Team Practice{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+
+  <div class="profile-header">
+    <div class="profile-avatar">{{ member.user[-2:] }}</div>
+    <div class="profile-title-area">
+      <h1 class="profile-name">{{ member.name or "（名前未設定）" }}</h1>
+      <p class="profile-user">@{{ member.user }}</p>
+      <p class="profile-tagline">{{ member.tagline or "（ひとことを入力してください）" }}</p>
+    </div>
+  </div>
+
+  <!-- 自己紹介 -->
+  <section class="profile-section">
+    <h2>🙋 自己紹介</h2>
+    {% if member.bio %}
+    <p>{{ member.bio }}</p>
+    {% else %}
+    <p class="placeholder">自己紹介文を入力してください（bio フィールド）</p>
+    {% endif %}
+  </section>
+
+  <!-- スキル・興味 -->
+  <section class="profile-section">
+    <h2>💻 興味のある技術</h2>
+    {% if member.skills %}
+    <ul class="tag-list">
+      {% for skill in member.skills %}
+      <li class="tag">{{ skill }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="placeholder">技術タグを追加してください（skills フィールド）</p>
+    {% endif %}
+  </section>
+
+  <div class="back-link">
+    <a href="/">← メンバー一覧に戻る</a>
+  </div>
+
+</div>
+{% endblock %}

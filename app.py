@@ -10,8 +10,25 @@ import glob
 app = Flask(__name__)
 
 
+def load_taglines():
+    """taglines.py から tagline 辞書を読み込む。失敗時は空辞書を返す"""
+    try:
+        import importlib.util, sys
+        spec = importlib.util.spec_from_file_location(
+            "taglines",
+            os.path.join(os.path.dirname(__file__), "taglines.py")
+        )
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return getattr(mod, "taglines", {})
+    except Exception as e:
+        print(f"[WARN] taglines.py の読み込みに失敗: {e}")
+        return {}
+
+
 def load_all_members():
     """members/ フォルダ内の全 userXX.py を読み込んでリストを返す"""
+    taglines = load_taglines()
     members = []
     pattern = os.path.join(os.path.dirname(__file__), "members", "user*.py")
     files = sorted(glob.glob(pattern))
@@ -19,7 +36,11 @@ def load_all_members():
         username = os.path.splitext(os.path.basename(filepath))[0]
         try:
             mod = importlib.import_module(f"members.{username}")
-            members.append(mod.member)
+            member = dict(mod.member)
+            # taglines.py の値で tagline を上書き（コンフリクト体験の結果を反映）
+            if username in taglines:
+                member["tagline"] = taglines[username]
+            members.append(member)
         except Exception as e:
             print(f"[WARN] {username}.py の読み込みに失敗: {e}")
     return members
@@ -29,7 +50,11 @@ def load_member(username):
     """指定ユーザーの member dict を返す。存在しなければ None"""
     try:
         mod = importlib.import_module(f"members.{username}")
-        return mod.member
+        member = dict(mod.member)
+        taglines = load_taglines()
+        if username in taglines:
+            member["tagline"] = taglines[username]
+        return member
     except ModuleNotFoundError:
         return None
 
@@ -46,7 +71,6 @@ def index():
 
 @app.route("/members/<username>")
 def member_page(username):
-    # user01〜user15 のみ受け付ける
     if not username.startswith("user"):
         abort(404)
     member = load_member(username)
